@@ -77,8 +77,8 @@ function openZIP($file) {
 try {
 	require_once('docxreader.php');
 	
-	$filename = "stdc.docx";
 	$filename = "okk.docx";
+	$filename = "stdc.docx";
 	$filepath = INPUT.$filename;
 	
 	$doc = new DocxReader($filepath);

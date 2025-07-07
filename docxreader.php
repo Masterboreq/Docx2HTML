@@ -12,10 +12,15 @@ class DocxReader {
 	private $styles = array();
 	private $docHTML = "";
 	private $docText = "";
+	private $docProperties = array();
 
 
 public function __construct($path) {
 	return $this->fileData = $this->load($path);
+}
+
+final private function getProperties() {
+	return $this->docProperties;
 }
 
 final public function showLog($outputHTML = true) {
@@ -45,12 +50,37 @@ final public function showLog($outputHTML = true) {
 	return $errorText; //jedna mała wtopa: w przypadku braku błędów, nie tworzy wsadu w HTML-u
 }
 
+final private function readProperties($zipResource) {
+/*
+	Reads basic document's metadata (e.g. title, editor)
+	This method must be invoked from the inside of load() method An object of ZipArchive class must be present and valid.
+*/
+	if(($coreIndex = $zipResource->locateName('docProps/core.xml')) !== false) {
+		$coreXML = $zipResource->getFromIndex($coreIndex);
+		$xml = simplexml_load_string($coreXML);
+		$namespaces = $xml->getNamespaces(true);
+
+		$children = $xml->children($namespaces['dc']);
+		$this->docProperties['creator'] = htmlspecialchars($children->creator);
+		$this->docProperties['title'] = htmlspecialchars($children->title);
+		return $this->docProperties;
+	}
+	else {
+		$this->errors[] = "Can't read document's metadata.";
+	}
+	return false;
+}
+
 final private function load($file) {
+	//TODO: zrefaktoryzować to na metody czytające style, media, właściwości etc.
 	if (file_exists($file)) {
 		$zip = new ZipArchive();
 		$openedZip = $zip->open($file);
 		if($openedZip === true) {
-			//attempt to load styles:
+			//attempt to read document's metadata
+			$this->readProperties($zip);
+			
+			//attempt to load styles. TODO: refaktoryzować do odrębnej metody!
 			if(($styleIndex = $zip->locateName('word/styles.xml')) !== false) {
 				$stylesXml = $zip->getFromIndex($styleIndex);
 				$xml = simplexml_load_string($stylesXml);
@@ -89,9 +119,10 @@ final private function load($file) {
 
 			if (($index = $zip->locateName('word/document.xml')) !== false) {
 				// If found, read it to the string
-				$data = $zip->getFromIndex($index);					
+				$data = $zip->getFromIndex($index);
 			}
 			$zip->close();
+			
 			return $data;
 		}
 		else {
@@ -126,6 +157,8 @@ final private function load($file) {
 	else {
 		$this->errors[] = 'File does not exist.';
 	}
+	
+	return false;
 } //END load()
 
 
@@ -143,7 +176,22 @@ final public function to_html() {
 
 		$children = $xml->children($namespaces['w']);
 
-		$html = '<!doctype html><html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><title></title><style>span.block { display: block; }</style></head><body>';
+$html = <<<HTML
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		
+		<meta name="author" content="{$this->docProperties['creator']}">
+		<meta name="designer" content="Marcin Borkowicz/ZIP toolkit">
+		<meta name="copyright" content="" />
+		<meta name="topic" content="{$this->docProperties['title']}" />
+		<title>{$this->docProperties['title']}</title>
+		<style>p.block { display: block; }
+		</style>
+	</head>
+	<body>
+HTML;
 
 		foreach($children->body->p as $p) {
 			$style = '';
@@ -218,7 +266,7 @@ final public function to_html() {
 			if ($li) {
 				$html.='</li>';
 			}
-			$html.="</p>";
+			$html.="</p>\n";
 		}
 
 		//Trying to weed out non-utf8 stuff from the file:
@@ -236,7 +284,8 @@ final public function to_html() {
 END;
 		preg_replace($regex, '$1', $html);
 
-		return $this->docHTML = $html.'</body></html>';
+		return $this->docHTML = $html.'</body>
+		</html>';
 	} //END if()
 	return false;
 }

@@ -59,7 +59,7 @@ class Docx_reader {
 				//read and save images
 				for ( $i = 0; $i < $zip->numFiles; $i ++ ) {
 					$zip_element = $zip->statIndex( $i );
-					if ( preg_match( "([^\s]+(\.(?i)(jpg|jpeg|png|gif|bmp))$)", $zip_element['name'] ) ) {
+					if ( preg_match( "([^\s]+(\.(?i)(jpg|jpeg|png|gif|bmp|wmf))$)", $zip_element['name'] ) ) {
 						$imglnk = new Docx_ws_imglnk;
 						$imglnk->originalpath = $zip_element['name'];
 						$imagename = explode( '/',   $zip_element['name'] );
