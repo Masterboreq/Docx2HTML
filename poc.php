@@ -56,32 +56,37 @@ function scan4docx() {
 function openZIP($file) {
 /*
 	Reads DOCX $file as an input.
-	Returns XML string if success; false otherwise.
+	Returns raw XML string if success; false otherwise.
 */
 	$zip = new ZipArchive;
 	$res = $zip->open($file, ZipArchive::RDONLY);
-	echo "\$res ", var_dump($res), EOL;
+	//echo "\$res ", var_dump($res), EOL;
 	if ($res === TRUE) {
 		//find 'document.xml'
-		$document = $zip->getFromName('word/document.xml'); // backslashes for Windows OS only
-		echo "\$document ", var_dump($document), EOL;
-		$xml = simplexml_load_string($document);
-		echo "\$xml ", var_dump($xml), EOL;
+		$document = $zip->getFromName('word/document.xml');
+		//echo "\$document ", var_dump($document), EOL;
 	} else {
 		 return false;
 	}
 	$zip->close();
-	return $xml;
+	return $document; //raw string of text; to be parsed and process on a later stage
+}
+
+
+//cleanup a MS Word XML document and format as a HTML file
+function wordxml2html() {
+	
 }
 
 
 # ### main loop of the script ###
 try {
 	$filename = "okk.docx";
+	$filename = "stdc.docx";
 	$filepath = INPUT.$filename;
 	
 	$docx = openZIP($filepath);
-	var_dump($docx);
+	echo $docx;
 }
 catch(Exception $docx) {
 	echo $docx->getMessage(), EOL;
