@@ -73,12 +73,6 @@ function openZIP($file) {
 }
 
 
-//cleanup a MS Word XML document and format as a HTML file
-function wordxml2html() {
-	
-}
-
-
 # ### main loop of the script ###
 try {
 	require_once('docxreader.php');
@@ -87,17 +81,13 @@ try {
 	$filename = "okk.docx";
 	$filepath = INPUT.$filename;
 	
-	$doc = new Docx_reader($filepath);
+	$doc = new DocxReader($filepath);
 
-	if(!$doc->get_errors()) {
+
 		 $html = $doc->to_html();
-		 $plain_text = $doc->to_plain_text();
+		 
+		 echo $html; //or echo $doc; #will invoke magic method __toString(); previously to_plain_text() method
 
-		 echo $html;
-	}
-	else {
-    echo implode(', ',$doc->get_errors());
-	}
 
 	
 }
@@ -105,7 +95,4 @@ catch(Exception $docx) {
 	
 	echo $docx->getMessage(), EOL;
 }
-
-
-// git commit -m"ADDED: first version of openZIP() function. Basic testbed included."
 ?>

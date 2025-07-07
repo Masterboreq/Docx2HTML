@@ -3,7 +3,7 @@
 	Author: Jason Crider https://github.com/xylude
 	https://github.com/xylude/Docx-to-HTML/
  */
-class Docx_reader {
+class DocxReader {
 
 	private $fileData = false;
 	private $errors = array();
@@ -15,8 +15,33 @@ class Docx_reader {
 	public function __construct($path) {
 		return $this->fileData = $this->load($path);
 	}
+	
+	public final function getErrors($outputHTML = true) {
+		# list all error during the load or processing of the DOCX file
+		$errorText = "";
+		if(count($this->errors)===0) {
+			$errorText = "No error during processing the file";
+		}
+		else {
+			if($outputHTML) {
+				//HTML output
+				$errorText = "<h4>Error list</h4>\n<ul>\n";
+				foreach($this->errors as $i => $errMess) {
+					$errorText .= '<li>${errMess}</li>\n';
+				}
+				$errorText .= '</ul>\n';
+			}
+			else {
+				//plain text output
+				foreach($this->errors as $i => $errMess) {
+					$errorText .= '$errMess\n';
+				}
+			}
+		}
+		return;
+	}
 
-	private function load($file) {
+	private final function load($file) {
 		if (file_exists($file)) {
 			$zip = new ZipArchive();
 			$openedZip = $zip->open($file);
@@ -100,14 +125,14 @@ class Docx_reader {
 	} //END load()
 
 
-	public function __toString() {
+	public final function __toString() {
 		if ($this->fileData) {
 			return strip_tags($this->fileData);
 		}
 		return false;
 	}
 
-	public function to_html() {
+	public final function to_html() {
 		if($this->fileData) {
 			$xml = simplexml_load_string($this->fileData);
 			$namespaces = $xml->getNamespaces(true);
@@ -141,7 +166,7 @@ class Docx_reader {
 					}
 				}
 
-				$html.='<span class="block" style="' . $style . '">';
+				$html.='<p class="block" style="' . $style . '">';
 				$li = false;
 				if ($p->pPr->numPr) {
 					$li = true;
@@ -189,7 +214,7 @@ class Docx_reader {
 				if ($li) {
 					$html.='</li>';
 				}
-				$html.="</span>";
+				$html.="</p>";
 			}
 
 			//Trying to weed out non-utf8 stuff from the file:
@@ -207,16 +232,12 @@ class Docx_reader {
 END;
 			preg_replace($regex, '$1', $html);
 
-			return $html . '</body></html>';
+			return $this->docHTML = $html.'</body></html>';
 		} //END if()
 		return false;
 	}
 
-	public function get_errors() {
-		return $this->errors;
-	}
-
-	private function getStyles() {
+	private final function getStyles() {
 	}
 
 }
