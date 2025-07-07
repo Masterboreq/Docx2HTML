@@ -35,7 +35,7 @@ function removeslashes($string) {
 }
 
 //scan and find DOCX files in the directory
-function scan4docx {
+function scan4docx() {
 	# ### TODO: a stub only; later for point *6
 /* foreach($_FILES as $name => $properties) {
 	$uploadfile = $campaignDir."/".basename($_FILES[$name]['name']);
@@ -62,7 +62,7 @@ function openZIP($file) {
 	$res = $zip->open($file, ZipArchive::RDONLY);
 	if ($res === TRUE) {
 		 //find 'document.xml'
-		 $document = $res->getFromName('word\document.xml'); // backslashes for Windows OS only
+		 $document = $zip->getFromName('word\document.xml'); // backslashes for Windows OS only
 		 $xml = simplexml_load_string($document);
 	} else {
 		 return false;
@@ -94,5 +94,5 @@ catch(Exception $docx) {
 	
 
 
-
+// git commit -m"ADDED: first version of openZIP() function. Basic testbed included."
 ?>
