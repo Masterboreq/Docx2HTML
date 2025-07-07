@@ -60,10 +60,13 @@ function openZIP($file) {
 */
 	$zip = new ZipArchive;
 	$res = $zip->open($file, ZipArchive::RDONLY);
+	echo "\$res ", var_dump($res), EOL;
 	if ($res === TRUE) {
-		 //find 'document.xml'
-		 $document = $zip->getFromName('word\document.xml'); // backslashes for Windows OS only
-		 $xml = simplexml_load_string($document);
+		//find 'document.xml'
+		$document = $zip->getFromName('word/document.xml'); // backslashes for Windows OS only
+		echo "\$document ", var_dump($document), EOL;
+		$xml = simplexml_load_string($document);
+		echo "\$xml ", var_dump($xml), EOL;
 	} else {
 		 return false;
 	}
