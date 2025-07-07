@@ -81,26 +81,19 @@ function wordxml2html() {
 
 # ### main loop of the script ###
 try {
+	require_once('docx2html.php');
+	
 	$filename = "okk.docx";
 	$filename = "stdc.docx";
 	$filepath = INPUT.$filename;
 	
-	$docx = openZIP($filepath);
-	echo $docx;
+	
 }
 catch(Exception $docx) {
 	echo $docx->getMessage(), EOL;
 }
 
-
-
-//dev
-	/*$fileName = "files-upload-log.txt";
-	$fp = fopen($fileName, "a");  */
-
-
-	
-
+getDocX($filepath);
 
 // git commit -m"ADDED: first version of openZIP() function. Basic testbed included."
 ?>
