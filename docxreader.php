@@ -8,6 +8,9 @@ class Docx_reader {
 	private $fileData = false;
 	private $errors = array();
 	private $styles = array();
+	private $docHTML = "";
+	private $docText = "";
+
 
 	public function __construct($path) {
 		return $this->fileData = $this->load($path);
@@ -17,9 +20,9 @@ class Docx_reader {
 		if (file_exists($file)) {
 			$zip = new ZipArchive();
 			$openedZip = $zip->open($file);
-			if ($openedZip === true) {
+			if($openedZip === true) {
 				//attempt to load styles:
-				if (($styleIndex = $zip->locateName('word/styles.xml')) !== false) {
+				if(($styleIndex = $zip->locateName('word/styles.xml')) !== false) {
 					$stylesXml = $zip->getFromIndex($styleIndex);
 					$xml = simplexml_load_string($stylesXml);
 					$namespaces = $xml->getNamespaces(true);
@@ -57,28 +60,27 @@ class Docx_reader {
 
 				if (($index = $zip->locateName('word/document.xml')) !== false) {
 					// If found, read it to the string
-					$data = $zip->getFromIndex($index);
-					// Close archive file
-					$zip->close();
-					return $data;
+					$data = $zip->getFromIndex($index);					
 				}
 				$zip->close();
-			} else {
+				return $data;
+			}
+			else {
 				switch($openedZip) {
 					case ZipArchive::ER_EXISTS:
 						$this->errors[] = 'File exists.';
 						break;
 					case ZipArchive::ER_INCONS:
-						$this->errors[] = 'Inconsistent zip file.';
+						$this->errors[] = 'Inconsistent ZIP file.';
 						break;
 					case ZipArchive::ER_MEMORY:
-						$this->errors[] = 'Malloc failure.';
+						$this->errors[] = 'Memory allocation failure.';
 						break;
 					case ZipArchive::ER_NOENT:
 						$this->errors[] = 'No such file.';
 						break;
 					case ZipArchive::ER_NOZIP:
-						$this->errors[] = 'File is not a zip archive.';
+						$this->errors[] = 'File is not a ZIP archive.';
 						break;
 					case ZipArchive::ER_OPEN:
 						$this->errors[] = 'Could not open file.';
@@ -95,19 +97,18 @@ class Docx_reader {
 		else {
 			$this->errors[] = 'File does not exist.';
 		}
-	}
+	} //END load()
 
 
-	public function to_plain_text() {
+	public function __toString() {
 		if ($this->fileData) {
 			return strip_tags($this->fileData);
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public function to_html() {
-		if ($this->fileData) {
+		if($this->fileData) {
 			$xml = simplexml_load_string($this->fileData);
 			$namespaces = $xml->getNamespaces(true);
 
@@ -150,7 +151,7 @@ class Docx_reader {
 				foreach($p->r as $part) {
 					//echo $part->t;
 					$tags = $startTags;
-					$attrs = $startAttrs;										
+					$attrs = $startAttrs;
 
 					foreach(get_object_vars($part->pPr) as $k => $v) {
 						if ($k = 'numPr') {
@@ -179,7 +180,7 @@ class Docx_reader {
 					}
 					$openTags = '';
 					$closeTags = '';
-					foreach ($tags as $tag) {
+					foreach($tags as $tag) {
 						$openTags.='<' . $tag . '>';
 						$closeTags.='</' . $tag . '>';
 					}
@@ -207,8 +208,8 @@ END;
 			preg_replace($regex, '$1', $html);
 
 			return $html . '</body></html>';
-			exit();
-		}
+		} //END if()
+		return false;
 	}
 
 	public function get_errors() {
