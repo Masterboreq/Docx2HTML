@@ -9,7 +9,7 @@ class Docx_reader {
 	private $errors = array();
 	private $styles = array();
 
-	public function __construct() {
+	public function __construct($path) {
 		return $this->fileData = $this->load($path);
 	}
 
