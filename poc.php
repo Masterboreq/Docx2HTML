@@ -77,22 +77,25 @@ function openZIP($file) {
 try {
 	require_once('docxreader.php');
 	
-	$filename = "okk.docx";
 	$filename = "stdc.docx";
+	$filename = "okk.docx";
 	$filepath = INPUT.$filename;
-	
+
 	$doc = new DocxReader($filepath);
 
+	$html = $doc->toHTML();
+	echo $html; //or echo $doc; #will invoke magic method __toString(); previously to_plain_text() method
 
-		 $html = $doc->to_html();
-		 
-		 echo $html; //or echo $doc; #will invoke magic method __toString(); previously to_plain_text() method
-
-
+	$fileToSave = str_replace(".", "-", $filename);
 	
+	if(($bytes = file_put_contents(OUTPUT.$fileToSave.".html", $html)) > 0) {
+		echo "Zapisano ", $bytes, " bajtów do pliku.";
+	}
+	else {
+		echo "Zapis do pliku się nie powiódł!";
+	}
 }
-catch(Exception $docx) {
-	
-	echo $docx->getMessage(), EOL;
+catch(Exception $doc) {
+	echo $doc->showLog(), EOL;
 }
 ?>

@@ -76,6 +76,7 @@ final private function load($file) {
 	if (file_exists($file)) {
 		$zip = new ZipArchive();
 		$openedZip = $zip->open($file);
+		//var_dump($zip);
 		if($openedZip === true) {
 			//attempt to read document's metadata
 			$this->readProperties($zip);
@@ -169,7 +170,7 @@ final public function __toString() {
 	return false;
 }
 
-final public function to_html() {
+final public function toHTML() {
 	if($this->fileData) {
 		$xml = simplexml_load_string($this->fileData);
 		$namespaces = $xml->getNamespaces(true);
