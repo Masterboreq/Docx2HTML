@@ -83,12 +83,11 @@ function wordxml2html() {
 try {
 	require_once('docxreader.php');
 	
-	$filename = "okk.docx";
 	$filename = "stdc.docx";
+	$filename = "okk.docx";
 	$filepath = INPUT.$filename;
 	
-	$doc = new Docx_reader();
-	$doc->setFile($filepath);
+	$doc = new Docx_reader($filepath);
 
 	if(!$doc->get_errors()) {
 		 $html = $doc->to_html();

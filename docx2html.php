@@ -154,7 +154,8 @@ class Docx_reader {
 					$this->document->loadXML($XMLTEXT);
 				}
 				$zip->close();
-			} else {
+			}
+			else {
 				switch($openedZip) {
 					case ZipArchive::ER_EXISTS:
 						$this->errors[] = 'File exists.';
