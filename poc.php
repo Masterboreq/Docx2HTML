@@ -89,10 +89,10 @@ try {
 	$fileToSave = str_replace(".", "-", $filename);
 	
 	if(($bytes = file_put_contents(OUTPUT.$fileToSave.".html", $html)) > 0) {
-		echo "Zapisano ", $bytes, " bajtów do pliku.";
+		echo "Saved ", $bytes, " bytes to a file.";
 	}
 	else {
-		echo "Zapis do pliku się nie powiódł!";
+		echo "Saving file failed!";
 	}
 }
 catch(Exception $doc) {

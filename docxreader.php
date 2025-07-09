@@ -13,6 +13,7 @@ class DocxReader {
 	private $docHTML = "";
 	private $docText = "";
 	private $docProperties = array();
+	private $imagesNumber = 0;
 
 
 public final function __construct($path) {
@@ -22,8 +23,6 @@ public final function __construct($path) {
 protected final function getProperties() {
 	return $this->docProperties;
 }
-
-
 
 public final function showLog($outputHTML = true) {
 	# list all error during the load or processing of the DOCX file
@@ -52,10 +51,39 @@ public final function showLog($outputHTML = true) {
 	return $errorText; // small issue: when there are no errors, it doesn't create HTML output
 }
 
+
+protected final function readImages($zipResource) {
+/*
+	Reads and saves images embeded in a document.
+	This method MUST be invoked from the inside of load() method. An object of ZipArchive class must be present and valid.
+*/
+	for($i = 0; $i < $zipResource->numFiles; $i++) {
+		$zipElement = $zipResource->statIndex($i);
+		if(preg_match("([^\s]+(\.(?i)(jpg|jpeg|png|gif|bmp|wmf|emf))$)", $zipElement['name'])) {
+			$originalpath = $zipElement['name'];
+			$imagename = explode('/', $zipElement['name']);
+			$imagename = end($imagename);
+			$extractedpath = dirname(__FILE__) . '/output/'.$imagename; //TEMPORARY path for testing only!
+	
+			if(file_put_contents($extractedpath, $zipResource->getFromIndex($i)) > 0) {
+				$this->imagesNumber++;
+			}
+			/*
+			$imglnk->extractedpath = str_replace('var/www/', 'https://boreqnet/output', $imglnk->extractedpath);
+			$imglnk->extractedpath = substr($imglnk->extractedpath, 1);
+		
+			array_push($this->imglnks, $imglnk);
+			*/
+		}
+	}
+	echo "Saved ", $this->imagesNumber, " image(s)!";
+	return (int)$this->imagesNumber;
+}
+
 protected final function readProperties($zipResource) {
 /*
 	Reads basic document's metadata (e.g. title, editor)
-	This method must be invoked from the inside of load() method An object of ZipArchive class must be present and valid.
+	This method MUST be invoked from the inside of load(). method An object of ZipArchive class must be present and valid.
 */
 	if(($coreIndex = $zipResource->locateName('docProps/core.xml')) !== false) {
 		$coreXML = $zipResource->getFromIndex($coreIndex);
@@ -82,6 +110,9 @@ private function load($file) {
 		if($openedZip === true) {
 			//attempt to read document's metadata
 			$this->readProperties($zip);
+			
+			//attempt to read and save images inside the file
+			$this->readImages($zip);
 			
 			//attempt to load styles. TODO: refactorize this to a separate method
 			if(($styleIndex = $zip->locateName('word/styles.xml')) !== false) {
