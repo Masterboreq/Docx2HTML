@@ -19,7 +19,7 @@ public final function __construct($path) {
 	return $this->fileData = $this->load($path);
 }
 
-final private function getProperties() {
+protected final function getProperties() {
 	return $this->docProperties;
 }
 
