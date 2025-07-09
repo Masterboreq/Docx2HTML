@@ -7,7 +7,7 @@
 
 class DocxReader {
 
-	private $fileData = false;
+	private $docXML = false; //the content of a document.xml after successful readout of a DOCX file
 	private $errors = array();
 	private $styles = array();
 	private $docHTML = "";
@@ -16,12 +16,14 @@ class DocxReader {
 
 
 public final function __construct($path) {
-	return $this->fileData = $this->load($path);
+	return $this->docXML = $this->load($path);
 }
 
 protected final function getProperties() {
 	return $this->docProperties;
 }
+
+
 
 public final function showLog($outputHTML = true) {
 	# list all error during the load or processing of the DOCX file
@@ -117,7 +119,6 @@ private function load($file) {
 				}
 				$this->styles = $styles;
 			}
-
 			if (($index = $zip->locateName('word/document.xml')) !== false) {
 				// If found, read it to the string
 				$data = $zip->getFromIndex($index);
@@ -164,15 +165,15 @@ private function load($file) {
 
 
 public final function __toString() {
-	if ($this->fileData) {
-		return strip_tags($this->fileData);
+	if ($this->docXML) {
+		return strip_tags($this->docXML);
 	}
 	return false;
 }
 
 public final function toHTML() {
-	if($this->fileData) {
-		$xml = simplexml_load_string($this->fileData);
+	if($this->docXML) {
+		$xml = simplexml_load_string($this->docXML);
 		$namespaces = $xml->getNamespaces(true);
 
 		$children = $xml->children($namespaces['w']);
@@ -200,7 +201,7 @@ HTML;
 			$startTags = array();
 			$startAttrs = array();
 			
-			if($p->pPr->pStyle) {					
+			if($p->pPr->pStyle) {
 				$objectAttrs = $p->pPr->pStyle->attributes('w',true);
 				$objectStyle = (String) $objectAttrs['val'];
 				if(isset($this->styles[$objectStyle])) {
