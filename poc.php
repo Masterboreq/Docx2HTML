@@ -1,7 +1,7 @@
 <?php
 /*
-	poc.php //codename
-	Project: Outokumpu DOCX to HTML converter
+	poc.php
+	Project: DOCX to HTML converter
 	
 	Proof of concept of an indirect translating DOCX files to HTML format without even using MS Office COM objects:
 	The principle of work:
