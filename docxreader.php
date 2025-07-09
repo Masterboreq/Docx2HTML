@@ -15,7 +15,7 @@ class DocxReader {
 	private $docProperties = array();
 
 
-public function __construct($path) {
+public final function __construct($path) {
 	return $this->fileData = $this->load($path);
 }
 
@@ -23,7 +23,7 @@ final private function getProperties() {
 	return $this->docProperties;
 }
 
-final public function showLog($outputHTML = true) {
+public final function showLog($outputHTML = true) {
 	# list all error during the load or processing of the DOCX file
 	//TO CONSIDER: to change this method to show debugging data (Chronolog from my ZIP tools!)
 	$errorText = "";
@@ -47,10 +47,10 @@ final public function showLog($outputHTML = true) {
 		}
 	}
 	
-	return $errorText; //jedna mała wtopa: w przypadku braku błędów, nie tworzy wsadu w HTML-u
+	return $errorText; // small issue: when there are no errors, it doesn't create HTML output
 }
 
-final private function readProperties($zipResource) {
+protected final function readProperties($zipResource) {
 /*
 	Reads basic document's metadata (e.g. title, editor)
 	This method must be invoked from the inside of load() method An object of ZipArchive class must be present and valid.
@@ -71,8 +71,8 @@ final private function readProperties($zipResource) {
 	return false;
 }
 
-final private function load($file) {
-	//TODO: zrefaktoryzować to na metody czytające style, media, właściwości etc.
+private function load($file) {
+	//TODO: refactor this into methods that read styles, media, properties, etc.
 	if (file_exists($file)) {
 		$zip = new ZipArchive();
 		$openedZip = $zip->open($file);
@@ -81,7 +81,7 @@ final private function load($file) {
 			//attempt to read document's metadata
 			$this->readProperties($zip);
 			
-			//attempt to load styles. TODO: refaktoryzować do odrębnej metody!
+			//attempt to load styles. TODO: refactorize this to a separate method
 			if(($styleIndex = $zip->locateName('word/styles.xml')) !== false) {
 				$stylesXml = $zip->getFromIndex($styleIndex);
 				$xml = simplexml_load_string($stylesXml);
@@ -163,14 +163,14 @@ final private function load($file) {
 } //END load()
 
 
-final public function __toString() {
+public final function __toString() {
 	if ($this->fileData) {
 		return strip_tags($this->fileData);
 	}
 	return false;
 }
 
-final public function toHTML() {
+public final function toHTML() {
 	if($this->fileData) {
 		$xml = simplexml_load_string($this->fileData);
 		$namespaces = $xml->getNamespaces(true);
@@ -291,8 +291,8 @@ END;
 	return false;
 }
 
-final private function getStyles() {
+protected final function getStyles() {
 }
-
+//TODO:
 }
 ?>
